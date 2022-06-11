@@ -1,10 +1,11 @@
 import type { NextPage } from 'next';
-import { Head } from '../components/1-common';
-import { useUser } from '../context/user.context';
-import { Protected } from '../hoc/protected';
+import { Head, PageLoading } from '../components/1-common';
+import useUser from '../src/hooks/useUser';
 
 const Home: NextPage = () => {
-  const { user } = useUser();
+  const { isLoggedIn } = useUser({ redirectTo: '/auth/login' });
+
+  if (!isLoggedIn) return <PageLoading />;
 
   return (
     <div>
@@ -15,4 +16,4 @@ const Home: NextPage = () => {
   );
 };
 
-export default Protected(Home);
+export default Home;

@@ -8,9 +8,10 @@ import PriceCheckIcon from '@mui/icons-material/PriceCheck';
 import CreditScoreIcon from '@mui/icons-material/CreditScore';
 
 import { hasNoNav } from './utils';
-import { DEVICE_DOWN } from '../../../constant/breakpoints';
+import { DEVICE_DOWN } from '../../../src/constant/breakpoints';
 import { Logo } from './Logo';
 import { UserSection } from './User';
+import useUser from '../../../src/hooks/useUser';
 
 enum LinkItem {
   dashboard = 'Dashboard',
@@ -120,8 +121,9 @@ const NavItems = () => {
 
 const Nav = () => {
   const { pathname } = useRouter();
+  const { isLoggedIn } = useUser({ redirectTo: '/auth/login' });
 
-  if (hasNoNav(pathname)) return null;
+  if (!isLoggedIn || hasNoNav(pathname)) return null;
 
   return (
     <main>

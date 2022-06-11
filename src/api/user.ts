@@ -1,4 +1,4 @@
-import { auditApi, mkPath } from '../config/axios';
+import { auditApi, mkPath } from '../lib/axios';
 
 export type SigninType = {
   email: string;

@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useRouter } from 'next/router';
 import Image from 'next/image';
 import styled from '@emotion/styled';
 import Menu from '@mui/material/Menu';
@@ -10,7 +9,8 @@ import IconButton from '@mui/material/IconButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import Logout from '@mui/icons-material/Logout';
 
-import { useUser } from '../../../context/user.context';
+import useUser from '../../../src/hooks/useUser';
+import { authApi } from '../../../src/api/auth';
 
 const StyledUserContainer = styled.div`
   margin: 0.8rem 2rem;
@@ -20,8 +20,7 @@ const StyledUserContainer = styled.div`
 `;
 
 export const UserSection = () => {
-  const { profile, actions } = useUser();
-  const { push } = useRouter();
+  const { user, isLoggedIn, mutateUser } = useUser({ redirectTo: '/auth/login' });
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -31,12 +30,11 @@ export const UserSection = () => {
   const handleClose = () => {
     setAnchorEl(null);
   };
-  const onLogout = () => {
-    actions?.clearUser();
-    push('/auth/login');
+  const onLogout = async () => {
+    mutateUser(await authApi.logout());
   };
 
-  if (!profile) return null;
+  if (!isLoggedIn) return null;
 
   return (
     <StyledUserContainer>
@@ -46,7 +44,7 @@ export const UserSection = () => {
             <Image src="/assets/images/Avatar.svg" width={30} height={30} alt="avatar" />
           </IconButton>
         </Tooltip>
-        <div>{`${profile.firstName} ${profile.lastName}`}</div>
+        <div>{`${user?.firstName} ${user?.lastName}`}</div>
       </Stack>
       <Menu
         anchorEl={anchorEl}

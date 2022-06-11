@@ -33,3 +33,9 @@ export const auditApi = async (func: FuncApi) => {
 };
 
 export const mkPath = (basePath: string) => (path: string) => basePath + path;
+
+export const fetcher = async (endpoint: string, param: string) => {
+  const url = param ? endpoint + '/' + param : endpoint;
+  const { data } = await axios.get(url);
+  return data;
+};

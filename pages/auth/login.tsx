@@ -12,10 +12,10 @@ import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import styled from '@emotion/styled';
 
-import { authApi, SigninType } from '../../api/auth';
+import { authApi, SigninType } from '../../src/api/auth';
 import { ErrorToast } from '../../components/2-compound';
-import { useUser } from '../../context/user.context';
 import { useRouter } from 'next/router';
+import useUser from '../../src/hooks/useUser';
 
 const schema = z.object({
   email: z.string().email(),
@@ -56,17 +56,21 @@ const Login: NextPage = () => {
   });
   const [showPass, setShowPass] = useState(false);
   const [open, setOpen] = useState(false);
-  const { actions } = useUser();
+  const { mutateUser } = useUser({
+    redirectTo: '/',
+    redirectIfFound: true,
+  });
   const { replace } = useRouter();
 
   const onSubmit = async (val: SigninType) => {
     try {
-      const response = await authApi.signin(val);
-      actions?.signIn(response.accessToken, response.profile);
+      const { accessToken, ...data } = await authApi.login(val);
+      window.localStorage.setItem('accessToken', accessToken as string);
+      mutateUser(data);
       replace('/');
     } catch (error) {
       setOpen(true);
-      actions?.clearUser();
+      window.localStorage.removeItem('accessToken');
     }
   };
 
