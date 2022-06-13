@@ -26,11 +26,14 @@ async function loginRoute(req: NextApiRequest, res: NextApiResponse<LoginRespons
   const baseURL = process.env.NEXT_PUBLIC_AUDIT_SERVER_URL;
 
   try {
-    const { data } = await axios.post<ServerSigninResponseType>(`${baseURL}/auth/signin`, body);
-    const { accessToken, user } = data;
-
+    const { data: auth } = await axios.post<ServerSigninResponseType>(`${baseURL}/auth/signin`, body);
+    const { accessToken } = auth;
     req.session.accessToken = accessToken;
     await req.session.save();
+
+    const { data: user } = await axios.get(`${baseURL}/user/me`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
     res.json({ accessToken, user, isLoggedIn: true });
   } catch (error) {
     res.status(401).json({ accessToken: null, isLoggedIn: false });

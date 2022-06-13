@@ -3,10 +3,11 @@ import Router from 'next/router';
 import useSWR from 'swr';
 
 import type { UserResponseType } from '../../pages/api/user';
-import { fetcher } from '../lib/axios';
+import { fetcher, TokenName } from '../lib/axios';
 
 export default function useUser({ redirectTo = '', redirectIfFound = false } = {}) {
-  const { data, mutate: mutateUser } = useSWR<UserResponseType>('/api/user', fetcher);
+  // Do request to client api server
+  const { data, mutate: mutateUser } = useSWR<UserResponseType>('/api/user', fetcher(TokenName.na));
 
   useEffect(() => {
     // if no redirect needed, just return (example: already on /dashboard)

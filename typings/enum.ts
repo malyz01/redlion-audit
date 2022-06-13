@@ -6,9 +6,9 @@ export enum UnitTypeEnum {
 }
 
 export enum RoleEnum {
+  super = 'super',
   admin = 'admin',
   user = 'user',
-  employee = 'employee',
 }
 
 export enum UserStatusEnum {
@@ -18,6 +18,7 @@ export enum UserStatusEnum {
 }
 
 export enum AccessTypeEnum {
+  owner = 'owner',
   admin = 'admin',
   manager = 'manager',
 }

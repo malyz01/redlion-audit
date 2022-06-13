@@ -16,6 +16,8 @@ import { authApi, SigninType } from '../../src/api/auth';
 import { ErrorToast } from '../../components/2-compound';
 import { useRouter } from 'next/router';
 import useUser from '../../src/hooks/useUser';
+import { TokenName } from '../../src/lib/axios';
+import { useAlert } from '../../src/hooks/useAlert';
 
 const schema = z.object({
   email: z.string().email(),
@@ -55,7 +57,7 @@ const Login: NextPage = () => {
     resolver: zodResolver(schema),
   });
   const [showPass, setShowPass] = useState(false);
-  const [open, setOpen] = useState(false);
+  const { alertProps, actions } = useAlert();
   const { mutateUser } = useUser({
     redirectTo: '/',
     redirectIfFound: true,
@@ -65,18 +67,18 @@ const Login: NextPage = () => {
   const onSubmit = async (val: SigninType) => {
     try {
       const { accessToken, ...data } = await authApi.login(val);
-      window.localStorage.setItem('accessToken', accessToken as string);
+      window.localStorage.setItem(TokenName.audit, accessToken as string);
       mutateUser(data);
       replace('/');
     } catch (error) {
-      setOpen(true);
-      window.localStorage.removeItem('accessToken');
+      actions.setOpen(true, (error as Error).message);
+      window.localStorage.removeItem(TokenName.audit);
     }
   };
 
   return (
     <StyledMain>
-      <ErrorToast open={open} setOpen={setOpen} message="Invalid email or password" />
+      <ErrorToast {...alertProps} />
       <StyledFormContainer>
         <StyledHeader>
           <Image alt="logo" src="/assets/images/RedLion.svg" layout="intrinsic" width={80} height={80} />

@@ -1,11 +1,11 @@
-import { createTheme } from "@mui/material/styles";
-import { red, grey } from "@mui/material/colors";
+import { createTheme } from '@mui/material/styles';
+import { red, grey } from '@mui/material/colors';
 
 export const theme = createTheme({
   components: {
     MuiButton: {
       defaultProps: {
-        color: "secondary",
+        color: 'secondary',
         sx: {
           borderRadius: 0,
         },
@@ -13,20 +13,29 @@ export const theme = createTheme({
     },
     MuiTextField: {
       defaultProps: {
-        margin: "dense",
+        margin: 'dense',
       },
     },
     MuiInputLabel: {
       defaultProps: {
-        color: "secondary",
+        color: 'secondary',
       },
     },
     MuiOutlinedInput: {
       defaultProps: {
-        color: "secondary",
+        color: 'secondary',
+      },
+    },
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          '&.Mui-selected': { backgroundColor: grey[300], color: 'black' },
+          '&.Mui-selected:hover': { backgroundColor: grey[300], color: 'black' },
+        },
       },
     },
   },
+
   palette: {
     primary: {
       dark: red[900],

@@ -5,8 +5,8 @@ import MuiAlert, { AlertProps } from '@mui/material/Alert';
 
 type Props = {
   open: boolean;
-  setOpen: (bool: boolean) => void;
   message?: string;
+  onClose: () => void;
 };
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) {
@@ -15,14 +15,14 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(props,
 
 export const ErrorToast: React.FC<Props> = ({
   open,
-  setOpen,
   message = 'Something went wrong, Please contact support',
+  onClose,
 }) => {
   const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
     event?.preventDefault();
     if (reason === 'clickaway') return;
 
-    setOpen(false);
+    onClose();
   };
 
   return (

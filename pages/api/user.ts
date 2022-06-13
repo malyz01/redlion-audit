@@ -4,6 +4,7 @@ import { withIronSessionApiRoute } from 'iron-session/next';
 
 import { sessionOptions } from '../../src/lib/iron-session';
 import { RoleEnum, TimeZoneEnum } from '../../typings/enum';
+import { AccountModel } from '../../typings/models/AccountModel';
 
 export type UserType = {
   id: number;
@@ -12,7 +13,7 @@ export type UserType = {
   email: string;
   role: RoleEnum;
   timezone: TimeZoneEnum;
-  defaultAccount: number;
+  defaultAccount: AccountModel;
 };
 
 export type UserResponseType = {

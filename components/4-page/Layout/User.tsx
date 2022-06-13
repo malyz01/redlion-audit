@@ -11,6 +11,7 @@ import Logout from '@mui/icons-material/Logout';
 
 import useUser from '../../../src/hooks/useUser';
 import { authApi } from '../../../src/api/auth';
+import { TokenName } from '../../../src/lib/axios';
 
 const StyledUserContainer = styled.div`
   margin: 0.8rem 2rem;
@@ -32,6 +33,7 @@ export const UserSection = () => {
   };
   const onLogout = async () => {
     mutateUser(await authApi.logout());
+    window.localStorage.removeItem(TokenName.audit);
   };
 
   if (!isLoggedIn) return null;

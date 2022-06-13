@@ -1,0 +1,111 @@
+import { SyntheticEvent } from 'react';
+import { useForm } from 'react-hook-form';
+import { useSWRConfig } from 'swr';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
+import Stack from '@mui/material/Stack';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+
+import { ErrorToast } from '../../components/2-compound';
+import { accountApi, CreateAccountType } from '../../src/api/account';
+import { useRouter } from 'next/router';
+import { useAlert } from '../../src/hooks/useAlert';
+
+const SUBMIT_AND_DEFAULT = 'SUBMIT AND SET AS DEFAULT';
+
+const schema = z.object({
+  name: z.string().min(4, 'name must have a minimum of 4 letters').max(30, 'name must have a maximum of 30 letters'),
+  address: z.string().min(6, 'Address has a minimum of 6 characters'),
+  country: z.string().min(3, 'Country has a minimum of 6 characters'),
+});
+
+export const CreateAccountPage = () => {
+  const { push } = useRouter();
+  const { mutate } = useSWRConfig();
+  const { alertProps, actions } = useAlert();
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<CreateAccountType>({
+    resolver: zodResolver(schema),
+  });
+
+  const onSubmit = (event: SyntheticEvent) => {
+    event.preventDefault();
+    const btnName = (event.nativeEvent as any).submitter?.innerText;
+
+    handleSubmit(async (val: CreateAccountType) => {
+      val.setDefault = false;
+      if (btnName === SUBMIT_AND_DEFAULT) val.setDefault = true;
+
+      try {
+        await accountApi.createAccount(val);
+        mutate('/accounts');
+        mutate('/api/user');
+        push('/accounts');
+      } catch (error) {
+        actions.setOpen(true, (error as Error).message);
+      }
+    })(event);
+  };
+
+  return (
+    <Stack direction="row" justifyContent="center" flexGrow="1" p="8rem 0">
+      <main>
+        <ErrorToast {...alertProps} />
+        <Typography variant="h5" sx={{ marginBottom: '.8rem' }}>
+          CREATE ACCOUNT
+        </Typography>
+        <form onSubmit={onSubmit}>
+          <TextField
+            error={errors?.name ? true : false}
+            label="Name"
+            variant="outlined"
+            fullWidth
+            helperText={errors?.name?.message || ''}
+            {...register('name')}
+          />
+
+          <TextField
+            error={errors?.name ? true : false}
+            label="Address"
+            variant="outlined"
+            fullWidth
+            helperText={errors?.address?.message || ''}
+            {...register('address')}
+          />
+
+          <TextField
+            error={errors?.name ? true : false}
+            label="Country"
+            variant="outlined"
+            fullWidth
+            helperText={errors?.country?.message || ''}
+            {...register('country')}
+          />
+
+          <Stack direction="column" gap="10px" mt="1.5rem">
+            <Button variant="contained" size="medium" fullWidth type="button" onClick={() => reset()}>
+              Reset
+            </Button>
+
+            <Stack direction="row" gap="10px">
+              <Button variant="contained" size="medium" fullWidth type="submit">
+                {SUBMIT_AND_DEFAULT}
+              </Button>
+              <Button variant="contained" size="medium" fullWidth type="submit">
+                Submit
+              </Button>
+            </Stack>
+          </Stack>
+        </form>
+      </main>
+    </Stack>
+  );
+};
+
+export default CreateAccountPage;
