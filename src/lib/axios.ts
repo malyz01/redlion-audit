@@ -46,6 +46,7 @@ export const mkPath =
 export const fetcher =
   (tokenName: TokenName = TokenName.audit) =>
   async (endpoint: string, param?: string) => {
+    // refactor for additional token
     const baseURL = tokenName === TokenName.na ? '' : process.env.NEXT_PUBLIC_AUDIT_SERVER_URL;
     const token = getToken(tokenName);
     const url = param ? baseURL + endpoint + '/' + param : baseURL + endpoint;

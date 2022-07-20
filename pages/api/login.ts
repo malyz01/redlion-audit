@@ -17,6 +17,7 @@ type ServerSigninResponseType = {
 
 export type LoginResponseType = UserResponseType & {
   accessToken: string | null;
+  message?: string;
 };
 
 export default withIronSessionApiRoute(loginRoute, sessionOptions);
@@ -36,6 +37,7 @@ async function loginRoute(req: NextApiRequest, res: NextApiResponse<LoginRespons
     });
     res.json({ accessToken, user, isLoggedIn: true });
   } catch (error) {
-    res.status(401).json({ accessToken: null, isLoggedIn: false });
+    req.session.destroy();
+    res.status(401).json({ message: 'Incorrect email/password', accessToken: null, isLoggedIn: false });
   }
 }

@@ -7,7 +7,15 @@ import { fetcher, TokenName } from '../lib/axios';
 
 export default function useUser({ redirectTo = '', redirectIfFound = false } = {}) {
   // Do request to client api server
-  const { data, mutate: mutateUser } = useSWR<UserResponseType>('/api/user', fetcher(TokenName.na));
+  const { data, mutate: mutateUser } = useSWR<UserResponseType>('/api/user', fetcher(TokenName.na), {
+    revalidateIfStale: false,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    errorRetryCount: 2,
+    shouldRetryOnError(err) {
+      return err.message !== 'Unauthorized';
+    },
+  });
 
   useEffect(() => {
     // if no redirect needed, just return (example: already on /dashboard)
@@ -20,6 +28,7 @@ export default function useUser({ redirectTo = '', redirectIfFound = false } = {
       // If redirectIfFound is also set, redirect if the user was found
       (redirectIfFound && data?.isLoggedIn)
     ) {
+      if (!redirectIfFound && !data?.isLoggedIn) window.localStorage.removeItem(TokenName.audit);
       Router.push(redirectTo);
     }
   }, [data, redirectIfFound, redirectTo]);

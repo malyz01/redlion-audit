@@ -1,6 +1,5 @@
 import { SyntheticEvent } from 'react';
 import { useForm } from 'react-hook-form';
-import { useSWRConfig } from 'swr';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
@@ -9,11 +8,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 
 import { ErrorToast } from '../../components/2-compound';
-import { accountApi, CreateAccountType } from '../../src/api/account';
-import { useRouter } from 'next/router';
+import { CreateAccountType } from '../../src/http/account';
 import { useAlert } from '../../src/hooks/useAlert';
-
-const SUBMIT_AND_DEFAULT = 'SUBMIT AND SET AS DEFAULT';
+import { ACCOUNT_CREATE_TYPE, useNavContext } from '../../src/context/Nav.context';
 
 const schema = z.object({
   name: z.string().min(4, 'name must have a minimum of 4 letters').max(30, 'name must have a maximum of 30 letters'),
@@ -22,8 +19,7 @@ const schema = z.object({
 });
 
 export const CreateAccountPage = () => {
-  const { push } = useRouter();
-  const { mutate } = useSWRConfig();
+  const { actions: accountActions } = useNavContext();
   const { alertProps, actions } = useAlert();
   const {
     register,
@@ -38,15 +34,9 @@ export const CreateAccountPage = () => {
     event.preventDefault();
     const btnName = (event.nativeEvent as any).submitter?.innerText;
 
-    handleSubmit(async (val: CreateAccountType) => {
-      val.setDefault = false;
-      if (btnName === SUBMIT_AND_DEFAULT) val.setDefault = true;
-
+    handleSubmit((val: CreateAccountType) => {
       try {
-        await accountApi.createAccount(val);
-        mutate('/accounts');
-        mutate('/api/user');
-        push('/accounts');
+        accountActions?.createAccount(val, btnName as ACCOUNT_CREATE_TYPE);
       } catch (error) {
         actions.setOpen(true, (error as Error).message);
       }
@@ -95,10 +85,10 @@ export const CreateAccountPage = () => {
 
             <Stack direction="row" gap="10px">
               <Button variant="contained" size="medium" fullWidth type="submit">
-                {SUBMIT_AND_DEFAULT}
+                {ACCOUNT_CREATE_TYPE.createAsDefault}
               </Button>
               <Button variant="contained" size="medium" fullWidth type="submit">
-                Submit
+                {ACCOUNT_CREATE_TYPE.create}
               </Button>
             </Stack>
           </Stack>

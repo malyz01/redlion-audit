@@ -12,7 +12,7 @@ import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import styled from '@emotion/styled';
 
-import { authApi, SigninType } from '../../src/api/auth';
+import { authApi, SigninType } from '../../src/http/auth';
 import { ErrorToast } from '../../components/2-compound';
 import { useRouter } from 'next/router';
 import useUser from '../../src/hooks/useUser';
@@ -59,17 +59,15 @@ const Login: NextPage = () => {
   const [showPass, setShowPass] = useState(false);
   const { alertProps, actions } = useAlert();
   const { mutateUser } = useUser({
-    redirectTo: '/',
+    redirectTo: '/accounts',
     redirectIfFound: true,
   });
-  const { replace } = useRouter();
 
   const onSubmit = async (val: SigninType) => {
     try {
       const { accessToken, ...data } = await authApi.login(val);
       window.localStorage.setItem(TokenName.audit, accessToken as string);
       mutateUser(data);
-      replace('/');
     } catch (error) {
       actions.setOpen(true, (error as Error).message);
       window.localStorage.removeItem(TokenName.audit);

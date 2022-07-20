@@ -1,5 +1,4 @@
 import { useState, MouseEvent } from 'react';
-import useSWR from 'swr';
 import Button from '@mui/material/Button';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -12,25 +11,24 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { useRouter } from 'next/router';
 import { isEmpty } from 'lodash';
 
-import useUser from '../../../src/hooks/useUser';
-import { fetcher } from '../../../src/lib/axios';
 import { AccessTypeEnum } from '../../../typings/enum';
-
-type Accounts = {
-  id: number;
-  name: string;
-  accessType: AccessTypeEnum;
-};
+import { useNavContext } from '../../../src/context/Nav.context';
+import { DefaultAccountType } from '../../../pages/api/user';
 
 type PropsAccountList = {
-  accountList: Accounts[];
   type: AccessTypeEnum[];
-  selectedId: number;
-  handleMenuItemClick: (val: string | number) => void;
+  handleClose: () => void;
 };
 
-const AccountList = ({ accountList, type, selectedId, handleMenuItemClick }: PropsAccountList) => {
-  const list = accountList.filter((account) => type.includes(account.accessType));
+const AccountList = ({ type, handleClose }: PropsAccountList) => {
+  const { accounts, selected, actions } = useNavContext();
+  const list = accounts.filter((account) => type.includes(account.accessType));
+
+  const handleMenuItemClick = (account: DefaultAccountType) => {
+    actions?.setSelected!(account);
+    handleClose();
+  };
+
   if (isEmpty(list)) return null;
 
   return (
@@ -47,9 +45,9 @@ const AccountList = ({ accountList, type, selectedId, handleMenuItemClick }: Pro
       >
         {type.includes(AccessTypeEnum.owner) ? 'OWNED' : 'MODERATED'}
       </Box>
-      {list.map((o, idx) => (
-        <MenuItem key={idx} selected={o.id === selectedId} onClick={() => handleMenuItemClick(o.id)}>
-          {o.name}
+      {list.map((account, idx) => (
+        <MenuItem key={idx} selected={account.id === selected?.id} onClick={() => handleMenuItemClick(account)}>
+          {account.name}
         </MenuItem>
       ))}
     </>
@@ -57,25 +55,17 @@ const AccountList = ({ accountList, type, selectedId, handleMenuItemClick }: Pro
 };
 
 export const Account = () => {
-  const { data: accounts } = useSWR<Accounts[]>('/accounts', fetcher());
-  const { user } = useUser();
+  const { isLoggedIn, selected, actions } = useNavContext();
   const { pathname, push } = useRouter();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [selectedId, setSelectedId] = useState<number>(user?.defaultAccount?.id || 0);
   const open = Boolean(anchorEl);
-
-  const displaySetAsDefault = (id?: number) => {
-    if (!!user?.defaultAccount || !id || user?.defaultAccount?.id === id) return 'none';
-    return 'inline-flex';
-  };
 
   const handleClickListItem = (event: MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
-  const handleMenuItemClick = (id: number | string) => {
-    if (id === 'create') push('/accounts/create');
-    if (id !== selectedId && typeof id === 'number') setSelectedId(id);
+  const handleCreateBtnClick = () => {
+    push('/accounts/create');
     setAnchorEl(null);
   };
 
@@ -83,10 +73,10 @@ export const Account = () => {
     setAnchorEl(null);
   };
 
-  if (!accounts) return null;
+  if (!isLoggedIn) return null;
 
   return (
-    <div>
+    <main>
       <List
         component="nav"
         aria-label="Device settings"
@@ -103,14 +93,19 @@ export const Account = () => {
         >
           <ListItemText
             primary="ACCOUNT"
-            secondary={accounts.find((o) => o.id === selectedId)?.name}
+            secondary={selected?.name}
             primaryTypographyProps={{ sx: { fontSize: '11px', fontWeight: 800 } }}
           />
         </ListItem>
         <Button
+          onClick={() => actions.setDefaultAccount(selected)}
           size="small"
           fullWidth
-          sx={{ fontSize: '10px', fontWeight: 800, display: displaySetAsDefault(selectedId) }}
+          sx={{
+            fontSize: '10px',
+            fontWeight: 800,
+            display: !selected || selected?.isDefault ? 'none' : 'inline-flex',
+          }}
         >
           Set as default
         </Button>
@@ -127,27 +122,17 @@ export const Account = () => {
       >
         <MenuItem
           disabled={pathname === '/accounts/create'}
-          onClick={() => handleMenuItemClick('create')}
+          onClick={handleCreateBtnClick}
           sx={{ fontSize: '12px', fontWeight: 800, display: 'flex', alignItems: 'flex-end', gap: '5px' }}
         >
           <AddCircleIcon fontSize="small" />
           CREATE NEW ACCOUNT
         </MenuItem>
 
-        <AccountList
-          accountList={accounts}
-          type={[AccessTypeEnum.owner]}
-          selectedId={selectedId}
-          handleMenuItemClick={handleMenuItemClick}
-        />
+        <AccountList type={[AccessTypeEnum.owner]} handleClose={handleClose} />
 
-        <AccountList
-          accountList={accounts}
-          type={[AccessTypeEnum.admin, AccessTypeEnum.manager]}
-          selectedId={selectedId}
-          handleMenuItemClick={handleMenuItemClick}
-        />
+        <AccountList type={[AccessTypeEnum.admin, AccessTypeEnum.manager]} handleClose={handleClose} />
       </Menu>
-    </div>
+    </main>
   );
 };

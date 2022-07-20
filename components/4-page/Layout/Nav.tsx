@@ -89,14 +89,14 @@ const NavItems = () => {
       <StyledItem>
         <Account />
       </StyledItem>
-      <StyledItem>
+      {/* <StyledItem>
         <Stack direction="row" spacing={1} alignItems="flex-end">
           <DashboardIcon color={isSelected(pathname, LinkItem.dashboard) ? 'secondary' : 'disabled'} />
           <StyledLinkItem onClick={onLinkClick(LinkItem.dashboard)} selected={isSelected(pathname, LinkItem.dashboard)}>
             {LinkItem.dashboard}
           </StyledLinkItem>
         </Stack>
-      </StyledItem>
+      </StyledItem> */}
       <StyledItem>
         <Stack direction="row" spacing={1} alignItems="flex-end">
           <AccountBalanceWalletIcon color={isSelected(pathname, LinkItem.account) ? 'secondary' : 'disabled'} />
@@ -139,6 +139,8 @@ const Nav = () => {
   const { pathname } = useRouter();
   const { isLoggedIn } = useUser({ redirectTo: '/auth/login' });
   const hideNav = !isLoggedIn || hasNoNav(pathname);
+
+  if (hideNav) return null;
 
   return (
     <Slide in={!hideNav} direction="right">

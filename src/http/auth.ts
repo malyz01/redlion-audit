@@ -7,6 +7,7 @@ export type SigninType = {
   password: string;
 };
 
+// Nextjs lambda functions
 export const authApi = {
   login: (data: SigninType): Promise<LoginResponseType> =>
     axios.post(`/api/login`, data).then(handleResponse).catch(handleAxiosError),

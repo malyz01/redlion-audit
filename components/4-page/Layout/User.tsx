@@ -10,8 +10,9 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import Logout from '@mui/icons-material/Logout';
 
 import useUser from '../../../src/hooks/useUser';
-import { authApi } from '../../../src/api/auth';
+import { authApi } from '../../../src/http/auth';
 import { TokenName } from '../../../src/lib/axios';
+import { useNavContext } from '../../../src/context/Nav.context';
 
 const StyledUserContainer = styled.div`
   margin: 0.8rem 2rem;
@@ -22,6 +23,7 @@ const StyledUserContainer = styled.div`
 
 export const UserSection = () => {
   const { user, isLoggedIn, mutateUser } = useUser({ redirectTo: '/auth/login' });
+  const { actions } = useNavContext();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -34,6 +36,7 @@ export const UserSection = () => {
   const onLogout = async () => {
     mutateUser(await authApi.logout());
     window.localStorage.removeItem(TokenName.audit);
+    actions?.logout();
   };
 
   if (!isLoggedIn) return null;
